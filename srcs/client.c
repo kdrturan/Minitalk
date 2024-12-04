@@ -1,5 +1,6 @@
 
 #include "minitalk.h"
+#define POSIX_C_SOURCE 208009L
 
 int	ft_atoi(const char *str)
 {
@@ -26,6 +27,14 @@ int	ft_atoi(const char *str)
 	return (result * sign);
 }
 
+int flag = 0;
+
+
+void signal_handler(int sig)
+{
+	if(sig == SIGUSR1)
+		flag = 1;
+}
 
 int	send_bits(int s_pid,char c)
 {
@@ -33,30 +42,33 @@ int	send_bits(int s_pid,char c)
 
 	while (i < 8)
 	{
+		flag = 0;
 		if (c & (1 << i))
 			kill(s_pid,SIGUSR1);
 		else
 			kill(s_pid,SIGUSR2);
 		i++;
-		usleep(1000);
+		if (!flag)
+			pause();
 	}
 	return(0);
 }
-
-
 
 int main(int argc,char *argv[])
 {
 	int s_pid;
 	int i = 0;
 
+
+	flag = 0;
+	signal(SIGUSR1, signal_handler); 
 	s_pid = ft_atoi(argv[1]);
 
-	printf("%d\n",s_pid);
 	while (argv[2][i])
 	{
 		send_bits(s_pid,argv[2][i]);
 		i++;
 	}
+	argc++;
 	return (0);
 }

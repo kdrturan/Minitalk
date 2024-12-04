@@ -6,7 +6,7 @@
 unsigned char byte = 0;  
 int bit_count = 0;
 
-int signal_handler(int sig)
+void signal_handler(int sig,siginfo_t *info, void *num)
 {
 	if (sig == SIGUSR1)
 		byte |= (1 << bit_count);
@@ -18,6 +18,8 @@ int signal_handler(int sig)
         byte = 0;
         bit_count = 0;
     }
+	kill(info->si_pid,SIGUSR1);
+	num++;
 }
 
 
@@ -27,9 +29,9 @@ int main(void)
 	struct sigaction sa;
 	
 	pid = getpid();
-	
-   	sa.sa_handler = signal_handler;
-	sa.sa_flags = 0;
+	bit_count = 0;
+   	sa.sa_sigaction = signal_handler;
+	sa.sa_flags = SA_SIGINFO;
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
 	printf("%d\n",pid);
@@ -37,6 +39,5 @@ int main(void)
 	{
 		pause();
 	}
-
 	return (0);
 }
