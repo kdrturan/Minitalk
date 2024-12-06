@@ -1,8 +1,26 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   client.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kdrturan <kdrturan@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/06 16:14:00 by kdrturan          #+#    #+#             */
+/*   Updated: 2024/12/06 16:45:25 by kdrturan         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "minitalk.h"
-#define POSIX_C_SOURCE 208009L
 
-int	ft_atoi(const char *str)
+int	flag;
+
+void	signal_handler(int sig)
+{
+	if (sig == SIGUSR1)
+		flag = 1;
+}
+
+int	ft_atoi_mini(const char *str)
 {
 	size_t	i;
 	int		sign;
@@ -27,48 +45,42 @@ int	ft_atoi(const char *str)
 	return (result * sign);
 }
 
-int flag = 0;
-
-
-void signal_handler(int sig)
+int	send_bits(int s_pid, char c)
 {
-	if(sig == SIGUSR1)
-		flag = 1;
-}
+	int	i;
 
-int	send_bits(int s_pid,char c)
-{
-	int i = 0;
-
+	i = 0;
 	while (i < 8)
 	{
 		flag = 0;
 		if (c & (1 << i))
-			kill(s_pid,SIGUSR1);
+			kill(s_pid, SIGUSR1);
 		else
-			kill(s_pid,SIGUSR2);
+			kill(s_pid, SIGUSR2);
 		i++;
 		if (!flag)
 			pause();
 	}
-	return(0);
+	return (0);
 }
 
-int main(int argc,char *argv[])
+int	main(int argc, char *argv[])
 {
-	int s_pid;
-	int i = 0;
-
+	int	s_pid;
+	int	i;
 
 	flag = 0;
-	signal(SIGUSR1, signal_handler); 
-	s_pid = ft_atoi(argv[1]);
-
-	while (argv[2][i])
+	i = 0;
+	flag = 0;
+	if (argc > 2)
 	{
-		send_bits(s_pid,argv[2][i]);
-		i++;
+		signal(SIGUSR1, signal_handler);
+		s_pid = ft_atoi_mini(argv[1]);
+		while (argv[2][i])
+		{
+			send_bits(s_pid, argv[2][i]);
+			i++;
+		}
 	}
-	argc++;
 	return (0);
 }

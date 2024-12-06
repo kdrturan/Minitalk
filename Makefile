@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -Werror
 PRINTF = libs/ft_printf/libftprintf.a
 
 SERVER_SRC = srcs/server.c
-CLIENT_SRC = srcs/client.c
+CLIENT_SRC = srcs/client.c 
 
 SERVER_OBJ = srcs/server.o
 CLIENT_OBJ = srcs/client.o
